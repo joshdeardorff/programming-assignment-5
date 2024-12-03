@@ -126,20 +126,30 @@ void send_raw_ip_packet(ipheader *ip)
     int enable = 1;
 
     // Create a raw socket and sets options associated with a socket
-    // TODO
     // create a socket
+    int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);  // raw socket
+    if (sockfd < 0)  // error checking for socket
+    {
+        perror("socket() failed");
+        exit(-1);
+    }
+
+
     // set socket options using sockopt
+    setsockopt(sockfd, IPPROTO_IP, IP_HDRINCL, &enable, sizeof(enable));  // set protocal here
 
     // Set packet destination info
-    // TODO
     // set destination info -> family and sin_addr provided by the ip header
+    dest_info.sin_family = AF_INET;
+    dest_info.sin_addr = ip->iph_destip;
 
     // Send the packet
     printf("Sending packet...\n");
     // This will be used by both the server and spoofer
     // error checking for sendto
     // if good, send the packet to the socket
+    sendto(sockfd, ip, ntohs(ip->iph_len), 0, (struct sockaddr *)&dest_info, sizeof(dest_info));
     
     // Closet socket
-    // TODO
+    close(sockfd);
 }
